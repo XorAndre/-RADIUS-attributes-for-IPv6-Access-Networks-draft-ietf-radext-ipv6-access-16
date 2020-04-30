@@ -33,27 +33,4 @@ Statut de ce mémo
 
    Cette version Internet expirera le 16 août 2013.
    
-   Table des matières
-
-   1. Introduction . . . . . . . . . . . . . . . . . . . . . . . . . 3
-   2. Scénarios de déploiement. . . . . . . . . . . . . . . . . . . . . 3
-     2.1. Attribution d'adresse IPv6. . . . . . . . . . . . . . . . . 4
-     2.2. Serveurs DNS. . . . . . . . . . . . . . . . . . . . . . . 4
-     2.3. Informations sur la route IPv6. . . . . . . . . . . . . . . . . . 5
-     2.4. Pool de préfixes IPv6 délégués. . . . . . . . . . . . . . . . 5
-     2.5. Pool d'adresses IPv6 avec état. . . . . . . . . . . . . . . . 5
-   3. Attributs. . . . . . . . . . . . . . . . . . . . . . . . . . 6
-     3.1. Adresse IPv6 encadrée. . . . . . . . . . . . . . . . . . . 6
-     3.2. Adresse DNS-Server-IPv6. . . . . . . . . . . . . . . . . 7
-     3.3. Route-IPv6-Information. . . . . . . . . . . . . . . . . . 8
-     3.4. Pool de préfixes IPv6 délégués. . . . . . . . . . . . . . . . 9
-     3.5. Pool d'adresses IPv6 avec état. . . . . . . . . . . . . . . . dix
-     3.6. Tableau d'attributs. . . . . . . . . . . . . . . . . . . dix
-   4. Considérations relatives au diamètre. . . . . . . . . . . . . . . . . . . 11
-   5. Considérations de sécurité. . . . . . . . . . . . . . . . . . . 11
-   6. Considérations IANA. . . . . . . . . . . . . . . . . . . . . 11
-   7. Remerciements. . . . . . . . . . . . . . . . . . . . . . . 12
-   8. Références. . . . . . . . . . . . . . . . . . . . . . . . . . 12
-     8.1. Références normatives . . . . . . . . . . . . . . . . . . . 12
-     8.2. Références informatives. . . . . . . . . . . . . . . . . . 12
-   Adresses des auteurs. . . . . . . . . . . . . . . . . . . . . . . . 13
+   
