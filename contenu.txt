@@ -26,454 +26,274 @@ Table of Contents
 
 
 
-
-
-
-
-
-
-
-Dec, et al.              Expires August 16, 2013                [Page 2]
+Dec et al. Expire le 16 août 2013 [Page 2]
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+Internet-Draft RADIUS IPv6 Access Février 2013
 
 
-1.  Introduction
+1 . introduction
 
-   This document specifies additional RADIUS attributes used to support
-   configuration of DHCPv6 and/or ICMPv6 Router Advertisement (RA)
-   parameters on a per-user basis.  The attributes, which complement
-   those defined in [RFC3162] and [RFC4818], support the following:
+   Ce document spécifie des attributs RADIUS supplémentaires utilisés pour prendre en charge la 
+   configuration des 
+   paramètres DHCPv6 et / ou ICMPv6 Router Advertisement (RA) par utilisateur. Les attributs, qui complètent 
+   ceux définis dans [ RFC3162 ] et [ RFC4818 ], prennent en charge les éléments suivants: 
 
-   o  Assignment of specific IPv6 addresses to hosts via DHCPv6.
+   o Attribution d'adresses IPv6 spécifiques à des hôtes via DHCPv6. 
 
-   o  Assignment of an IPv6 DNS server address, via DHCPv6 or Router
-      Advertisement [RFC6106].
+   o Attribution d'une adresse de serveur DNS IPv6, via DHCPv6 ou 
+      annonce de routeur [ RFC6106 ]. 
 
-   o  Configuration of more specific routes to be announced to the user
-      via the Route Information Option defined in [RFC4191] Section 2.3.
+   o Configuration de routes plus spécifiques à annoncer à l'utilisateur 
+      via l'option Route Information définie dans la [RFC4191] Section 2.3 .
 
-   o  The assignment of a named delegated prefix pool for use with "IPv6
-      Prefix Options for DHCPv6" [RFC3633].
+   o L'affectation d'un pool de préfixes délégués nommé à utiliser avec « 
+      Options de préfixe IPv6 pour DHCPv6» [ RFC3633 ]. 
 
-   o  The assignment of a named stateful address pool for use with
-      DHCPv6 stateful address assignment [RFC3315].
-
-
-2.  Deployment Scenarios
-
-   The extensions in this draft are intended to be applicable across a
-   wide variety of network access scenarios where RADIUS is involved.
-   One such typical network scenario is illustrated in Figure 1.  It is
-   composed of a IP Routing Residential Gateway (RG) or host, a Layer 2
-   Access-Node (AN) e.g. a Digital Subscriber Line Access Multiplexer -
-   DSLAM, an IP Network Access Servers (NASes), and an Authentication
-   Authorization & Accounting (AAA) server.
-
-                                                   +-----+
-                                                   | AAA |
-                                                   |     |
-                                                   +--+--+
-                                                      ^
-                                                      .
-                                                      .(Radius)
-                                                      .
-                                                      v
-                    +------+                      +---+---+
-     +------+       |  AN  |                      |  NAS  |
-     |  RG/ +-------|      +-----------+----------+       |
-     | host |       |      |                      |       |
-     +------+ (DSL) +------+      (Ethernet)      +-------+
-
-                              Figure 1
+   o L'affectation d'un pool d'adresses avec état nommé à utiliser avec l' 
+      attribution d'adresses avec état DHCPv6 [ RFC3315 ].
 
 
+2 . Scénarios de déploiement
 
-Dec, et al.              Expires August 16, 2013                [Page 3]
+   Les extensions de ce projet sont destinées à être applicables à une 
+   grande variété de scénarios d'accès au réseau dans lesquels RADIUS est impliqué. 
+   Un tel scénario de réseau typique est illustré à la figure 1. Il est 
+   composé d'une passerelle résidentielle de routage IP (RG) ou d'un hôte, d'un 
+   nœud d'accès de couche 2 (AN), par exemple un multiplexeur d'accès de ligne d'abonné numérique - 
+   DSLAM, un serveur d'accès réseau IP (NAS) et un 
+   serveur d’autorisation d’ authentification et de comptabilité (AAA). 
+
+                                                   + ----- + 
+                                                   | AAA | 
+                                                   | | 
+                                                   + - + - +
+                                                      ^ 
+                                                      . 
+                                                      (Rayon) 
+                                                      . 
+                                                      v 
+                    + ------ + + --- + --- + 
+     + ------ + | AN | | NAS | 
+     | RG / + ------- | + ----------- + ---------- + | 
+     | hôte | | | | | 
+     + ------ + (DSL) + ------ + (Ethernet) + ------- + 
+
+                              Figure 1 Dec, et al. Expire le 16 août 2013 [Page 3]
+
+
+
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+Internet-Draft RADIUS IPv6 Access Février 2013
 
-
-   In the depicted scenario the NAS may utilize an IP address
-   configuration protocol (e.g. a DHCPv6 server) to handle address
-   assignment to RGs/hosts.  The RADIUS server authenticates each RG/
-   host and returns to the attributes used for authorization and
-   accounting.  These attributes can include a host's IPv6 address, a
-   DNS server address and a set of IPv6 routes to be advertised via any
-   suitable protocol, eg ICMPv6 (Neighbour Discovery).  The name of a
-   prefix pool to be used for DHCPv6 Prefix Delegation, or the name of
-   an address pool to be used for DHCPv6 address assignment can also be
-   attributes provided to the NAS by the RADIUS AAA server.
-
-   The following sub-sections discuss how these attributes are used in
-   more detail.
-
-2.1.  IPv6 Address Assignment
-
-   DHCPv6 [RFC3315] provides a mechanism to assign one or more non-
-   temporary IPv6 addresses to hosts.  To provide a DHCPv6 server
-   residing on a NAS with one or more IPv6 addresses to be assigned,
-   this document specifies the Framed-IPv6-Address Attribute.
-
-   While [RFC3162] permits an IPv6 address to be specified via the
-   combination of the Framed-Interface-Id and Framed-IPv6-Prefix
-   attributes, this separation is more natural for use with PPP's IPv6
-   Control Protocol than it is for use with DHCPv6, and the use of a
-   single IPv6 address attribute makes for easier processing of
-   accounting records.
-
-   Since DHCPv6 can be deployed on the same network as ICMPv6 stateless
-   (SLAAC) [RFC4862], it is possible that the NAS will require both
-   stateful and stateless configuration information.  Therefore it is
-   possible for the Framed-IPv6-Address, Framed-IPv6-Prefix and Framed-
-   Interface-Id attributes [RFC3162] to be included within the same
-   packet.  To avoid ambiguity in this case, the Framed-IPv6-Address
-   attribute is intended for authorization and accounting of DHCPv6-
-   assigned addresses and the Framed-IPv6-Prefix and Framed-Interface-Id
-   attributes used for authorization and accounting of addresses
-   assigned via SLAAC.
-
-2.2.  DNS Servers
-
-   DHCPv6 provides an option for configuring a host with the IPv6
-   address of a DNS server.  The IPv6 address of a DNS server can also
-   be conveyed to the host using ICMPv6 with Router Advertisements, via
-   the [RFC6106] option.  To provide the NAS with the IPv6 address of a
-   DNS server, this document specifies the DNS-Server-IPv6-Address
-   Attribute.
-
-
-
-
-Dec, et al.              Expires August 16, 2013                [Page 4]
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+   Dans le scénario illustré, le NAS peut utiliser un protocole de 
+   configuration d' adresse IP (par exemple un serveur DHCPv6) pour gérer l' 
+   attribution d' adresse aux RG / hôtes. Le serveur RADIUS authentifie chaque RG / 
+   hôte et revient aux attributs utilisés pour l'autorisation et la 
+   comptabilité. Ces attributs peuvent inclure l'adresse IPv6 d'un hôte, une 
+   adresse de serveur DNS et un ensemble de routes IPv6 à publier via tout 
+   protocole approprié, par exemple ICMPv6 (Neighbour Discovery). Le nom d'un 
+   pool de préfixes à utiliser pour la délégation de préfixe DHCPv6 ou le nom d' 
+   un pool d'adresses à utiliser pour l'attribution d'adresse DHCPv6 peut également être
+   attributs fournis au NAS par le serveur RADIUS AAA. 
 
+   Les sous-sections suivantes expliquent en 
+   détail comment ces attributs sont utilisés .
 
-2.3.  IPv6 Route Information
+2.1 . Attribution d'adresse IPv6
 
-   An IPv6 Route Information option, defined in [RFC4191] is intended to
-   be used to inform a host connected to the NAS that a specific route
-   is reachable via any given NAS.
+   DHCPv6 [ RFC3315 ] fournit un mécanisme pour attribuer une ou plusieurs 
+   adresses IPv6 non temporaires aux hôtes. Pour fournir un serveur DHCPv6 
+   résidant sur un NAS avec une ou plusieurs adresses IPv6 à attribuer, 
+   ce document spécifie l'attribut Framed-IPv6-Address. 
 
-   This document specifies the RADIUS attribute that allows the AAA
-   server to provision the announcement by the NAS of a specific Route
-   Information Option to an accessing host.  The NAS may advertise this
-   route using the method defined in [RFC4191], or using other
-   equivalent methods.  Any other information, such as preference or
-   life-time values, that is to be present in the actual announcement
-   using a given method is assumed to be determined by the NAS using
-   means not scoped by this document (e.g.  Local configuration on the
-   NAS).
+   Alors que [ RFC3162 ] permet de spécifier une adresse IPv6 via la 
+   combinaison des 
+   attributs Framed-Interface-Id et Framed-IPv6-Prefix , cette séparation est plus naturelle pour une utilisation avec le protocole de 
+   contrôle IPv6 de PPP que pour une utilisation avec DHCPv6, et l'utilisation d'un 
+   seul attribut d'adresse IPv6 facilite le traitement des 
+   enregistrements comptables.
 
-   While the Framed-IPv6-Prefix attribute defined in [RFC3162] Section
-   2.3 causes the route to be advertised in an RA, it cannot be used to
-   configure more specific routes.  While the Framed-IPv6-Route
-   attribute defined in [RFC3162] Section 2.5 causes the route to be
-   configured on the NAS, and potentially announced via an IP routing
-   protocol, depending on the value of Framed-Routing, it does not
-   result in the route being announced in an RA.
+   Étant donné que DHCPv6 peut être déployé sur le même réseau que ICMPv6 sans état 
+   (SLAAC) [ RFC4862 ], il est possible que le NAS nécessite 
+   des informations de configuration avec état et sans état. Par conséquent, il est 
+   possible que les 
+   attributs Framed-IPv6-Address, Framed-IPv6-Prefix et Framed -Interface-Id [ RFC3162 ] soient inclus dans le même 
+   paquet. Pour éviter toute ambiguïté dans ce cas, l' 
+   attribut Framed-IPv6-Address est destiné à l'autorisation et à la comptabilisation des adresses 
+   affectées par DHCPv6 et les attributs Framed-IPv6-Prefix et Framed-Interface-Id 
+   utilisés pour l'autorisation et la comptabilisation des adresses 
+   attribuées via SLAAC.
 
-2.4.  Delegated IPv6 Prefix Pool
+2.2 . Serveurs DNS
 
-   DHCPv6 Prefix Delegation (DHCPv6-PD) [RFC3633] involves a delegating
-   router selecting a prefix and delegating it on a temporary basis to a
-   requesting router.  The delegating router may implement a number of
-   strategies as to how it chooses what prefix is to be delegated to a
-   requesting router, one of them being the use of a local named prefix
-   pool.  The Delegated-IPv6-Prefix-Pool attribute allows the RADIUS
-   server to convey a prefix pool name to a NAS hosting a DHCPv6-PD
-   server and acting as a delegating router.
-
-   Since DHCPv6 Prefix Delegation can be used with SLAAC on the same
-   network, it is possible for the Delegated-IPv6-Prefix-Pool and
-   Framed-IPv6-Pool attributes to be included within the same packet.
-   To avoid ambiguity in this scenario, use of the Delegated-IPv6-
-   Prefix-Pool attribute should be restricted to authorization and
-   accounting of prefix pools used in DHCPv6 Prefix Delegation and the
-   Framed-IPv6-Pool attribute should be used for authorization and
-   accounting of prefix pools used in SLAAC.
-
-2.5.  Stateful IPv6 address pool
-
-   DHCPv6 [RFC3315] provides a mechanism to assign one or more non-
-   temporary IPv6 addresses to hosts.  Section 3.1 introduces the
+   DHCPv6 fournit une option pour configurer un hôte avec l' 
+   adresse IPv6 d'un serveur DNS. L'adresse IPv6 d'un serveur DNS peut également 
+   être transmise à l'hôte à l'aide d'ICMPv6 avec des annonces de routeur, via 
+   l' option [ RFC6106 ]. Pour fournir au NAS l'adresse IPv6 d'un 
+   serveur DNS, ce document spécifie l' 
+   attribut DNS-Server-IPv6-Address . Dec et al. Expire le 16 août 2013 [Page 4]
 
 
 
-Dec, et al.              Expires August 16, 2013                [Page 5]
+
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+Internet-Draft RADIUS IPv6 Access Février 2013
 
 
-   Framed-IPv6-Address attribute to be used for providing a DHCPv6
-   server residing on a NAS with one or more IPv6 addresses to be
-   assigned to the clients.  An alternative way to achieve a similar
-   result is for the NAS to select the IPv6 address to be assigned from
-   an address pool configured for this purpose on the NAS.  This
-   document specifies the Stateful-IPv6-Address-Pool attribute to allow
-   the RADIUS server to convey a pool name to be used for such stateful
-   DHCPv6 based addressing, and any subsequent accounting.
+2.3 . Informations sur la route IPv6
+
+   Une option IPv6 Route Information, définie dans [ RFC4191 ] est destinée à 
+   être utilisée pour informer un hôte connecté au NAS qu'une route spécifique 
+   est accessible via un NAS donné. 
+
+   Ce document spécifie l'attribut RADIUS qui permet au 
+   serveur AAA de provisionner l'annonce par le NAS d'une 
+   option d'information d' itinéraire spécifique à un hôte accédant. Le NAS peut annoncer cette 
+   route en utilisant la méthode définie dans [ RFC4191 ], ou en utilisant d'autres 
+   méthodes équivalentes. Toute autre information, telle que les 
+   valeurs de préférence ou de durée de vie, qui doit être présente dans l'annonce réelle en 
+   utilisant une méthode donnée est supposée être déterminée par le NAS en utilisant
+   signifie non couvert par ce document (par exemple, configuration locale sur le 
+   NAS). 
+
+   Bien que l'attribut Framed-IPv6-Prefix défini dans la [ RFC3162 ] section 
+   2.3 entraîne la publication de l'itinéraire dans une AR, il ne peut pas être utilisé pour 
+   configurer des itinéraires plus spécifiques. Bien que l' 
+   attribut Framed-IPv6-Route défini dans [RFC3162] Section 2.5 entraîne la 
+   configuration de la route sur le NAS, et potentiellement annoncée via un protocole de routage IP 
+   , selon la valeur de Framed-Routing, elle n'entraîne pas 
+   la route étant annoncé dans un RA.
+
+2.4 . Pool de préfixes IPv6 délégués
+
+   Délégation de préfixe DHCPv6 (DHCPv6-PD) [ RFC3633 ] implique qu'un 
+   routeur délégué sélectionne un préfixe et le délègue temporairement à un 
+   routeur demandeur. Le routeur délégué peut implémenter un certain nombre de 
+   stratégies quant à la façon dont il choisit quel préfixe doit être délégué à un 
+   routeur demandeur, l'une d'entre elles étant l'utilisation d'un 
+   pool de préfixes nommé local . L'attribut Delegated-IPv6-Prefix-Pool permet au 
+   serveur RADIUS de transmettre un nom de pool de préfixes à un NAS hébergeant un 
+   serveur DHCPv6-PD et agissant en tant que routeur délégué. 
+
+   Étant donné que la délégation de préfixe DHCPv6 peut être utilisée avec SLAAC sur le même 
+   réseau, il est possible pour le pool de préfixe IPv6 délégué et
+   Attributs Framed-IPv6-Pool à inclure dans le même paquet. 
+   Pour éviter toute ambiguïté dans ce scénario, l'utilisation de l'attribut Delegated-IPv6- 
+   Prefix-Pool doit être limitée à l'autorisation et à la 
+   comptabilisation des pools de préfixes utilisés dans la délégation de préfixe DHCPv6 et l' 
+   attribut Framed-IPv6-Pool doit être utilisé pour l'autorisation et la 
+   comptabilisation du préfixe pools utilisés dans SLAAC.
+
+2.5 . Pool d'adresses IPv6 avec état
+
+   DHCPv6 [ RFC3315 ] fournit un mécanisme pour attribuer une ou plusieurs 
+   adresses IPv6 non temporaires aux hôtes.  La section 3.1 présente le Dec, et al. Expire le 16 août 2013 [Page 5]
 
 
-3.  Attributes
 
-   The fields shown in the diagrams below are transmitted from left to
-   right.
-
-3.1.  Framed-IPv6-Address
-
-   This attribute indicates an IPv6 address that is assigned to the NAS-
-   facing interface of the RG/host.  It MAY be used in Access-Accept
-   packets, and MAY appear multiple times.  It MAY be used in an Access-
-   Request packet as a hint by the NAS to the RADIUS server that it
-   would prefer these IPv6 address(es), but the RADIUS server is not
-   required to honor the hint.  Since it is assumed that the NAS will
-   add a route corresponding to the address, it is not necessary for the
-   RADIUS server to also send a host Framed-IPv6-Route attribute for the
-   same address.
-
-   This attribute can be used by a DHCPv6 process on the NAS to assign a
-   unique IPv6 address to the RG/host.
-
-   A summary of the Framed-IPv6-Address attribute format is shown below.
-   The format of the address is as per [RFC3162].
-
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |     Length    |            Address
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                              Address (cont)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                              Address (cont)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                              Address (cont)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             Address (cont)         |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-
-
-
-Dec, et al.              Expires August 16, 2013                [Page 6]
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+Internet-Draft RADIUS IPv6 Access Février 2013
 
-
-   Type
-
-      TBA1 for Framed-IPv6-Address
-
-   Length
-
-      18
-
-   Address
-
-      The IPv6 address field contains a 128-bit IPv6 address.
-
-3.2.  DNS-Server-IPv6-Address
-
-   The DNS-Server-IPv6-Address attribute contains the IPv6 address of a
-   DNS server.  This attribute MAY be included multiple times in Access-
-   Accept packets, when the intention is for a NAS to announce more than
-   one DNS server addresses to a RG/host.  The same order of the
-   attributes is expected to be followed in the announcements to the
-   RADIUS client.  The attribute MAY be used in an Access-Request packet
-   as a hint by the NAS to the RADIUS server regarding the DNS IPv6
-   address, but the RADIUS server is not required to honor the hint.
-
-   The content of this attribute can be inserted in a DHCPv6 option as
-   specified in [RFC3646] or in an IPv6 Router Advertisment as per
-   [RFC6106].
-
-   A summary of the DNS-Server-IPv6-Address attribute format is given
-   below.  The format of the address is as per [RFC3162].
-
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |     Length    |            Address
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                              Address (cont)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                              Address (cont)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                              Address (cont)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             Address (cont)         |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-
-
-
-
-
-
-Dec, et al.              Expires August 16, 2013                [Page 7]
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+   Attribut Framed-IPv6-Address à utiliser pour fournir un 
+   serveur DHCPv6 résidant sur un NAS avec une ou plusieurs adresses IPv6 à 
+   attribuer aux clients. Une autre manière d'obtenir un 
+   résultat similaire consiste pour le NAS à sélectionner l'adresse IPv6 à attribuer à partir d' 
+   un pool d'adresses configuré à cet effet sur le NAS. Ce 
+   document spécifie l'attribut Stateful-IPv6-Address-Pool pour permettre 
+   au serveur RADIUS de transmettre un nom de pool à utiliser pour un tel 
+   adressage DHCPv6 avec état et toute comptabilité ultérieure.
 
 
-   Type
+3 . Les attributs
 
-      TBA2 for DNS-Server-IPv6-Address
+   Les champs représentés dans les schémas ci-dessous sont transmis de gauche à 
+   droite.
 
-   Length
+3.1 . Adresse IPv6 encadrée
 
-      18
+   Cet attribut indique une adresse IPv6 attribuée à l' 
+   interface NAS du RG / hôte. Il PEUT être utilisé dans des 
+   paquets Access-Accept , et PEUT apparaître plusieurs fois. Il PEUT être utilisé dans un 
+   paquet de demande d' accès comme indication par le NAS au serveur RADIUS qu'il 
+   préférerait ces adresses IPv6, mais le serveur RADIUS n'est pas 
+   tenu d'honorer l'indication. Comme il est supposé que le NAS 
+   ajoutera une route correspondant à l'adresse, il n'est pas nécessaire que le 
+   serveur RADIUS envoie également un attribut hôte Framed-IPv6-Route pour la 
+   même adresse. 
 
-   Address
+   Cet attribut peut être utilisé par un processus DHCPv6 sur le NAS pour attribuer une 
+   adresse IPv6 unique au RG / hôte.
 
-      The 128-bit IPv6 address of a DNS server.
+   Un résumé du format d'attribut Framed-IPv6-Address est présenté ci-dessous. 
+   Le format de l'adresse est conforme à [ RFC3162 ]. 
 
-3.3.  Route-IPv6-Information
-
-   This attribute specifies a prefix (and corresponding route) for the
-   user on the NAS, which is to be announced using the Route Information
-   Option defined in "Default Router Preferences and More Specific
-   Routes" [RFC4191] Section 2.3.  It is used in the Access-Accept
-   packet and can appear multiple times.  It MAY be used in an Access-
-   Request packet as a hint by the NAS to the RADIUS server, but the
-   RADIUS server is not required to honor the hint.  The Route-IPv6-
-   Information attribute format is depicted below.  The format of the
-   prefix is as per [RFC3162].
-
-
-        0                   1                   2                   3
-        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |     Type      |    Length     |   Reserved    | Prefix-Length |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                                                               |
-       .                        Prefix (variable)                      .
-       .                                                               .
-       |                                                               |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-   Type
-
-      TBA3 for Route-IPv6-Information
-
-   Length
-
-      Length in bytes.  At least 4 and no larger than 20; typically 12
-      or less.
-
-
+     0 1 2 3 
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+    | Type | Longueur | Adresse 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+                              Adresse (suite) 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+                              Adresse (suite) 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+                              Adresse (suite) 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+             Adresse (suite) | 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + Dec, et al. Expire le 16 août 2013 [Page 6]
 
 
 
 
 
-Dec, et al.              Expires August 16, 2013                [Page 8]
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+Internet-Draft RADIUS IPv6 Access Février 2013
 
-
-   Prefix Length
-
-      8-bit unsigned integer.  The number of leading bits in the prefix
-      that are valid.  The value ranges from 0 to 128.  The prefix field
-      is 0, 8 or 16 octets depending on Length.
-
-   Prefix
-
-      Variable-length field containing an IP prefix.  The prefix length
-      field contains the number of valid leading bits in the prefix.
-      The bits in the prefix after the prefix length (if any) are
-      reserved and MUST be initialized to zero.
-
-3.4.  Delegated-IPv6-Prefix-Pool
-
-   This attribute contains the name of an assigned pool that SHOULD be
-   used to select an IPv6 delegated prefix for the user on the NAS.  If
-   a NAS does not support prefix pools, the NAS MUST ignore this
-   attribute.  It MAY be used in an Access-Request packet as a hint by
-   the NAS to the RADIUS server regarding the pool, but the RADIUS
-   server is not required to honor the hint.
-
-   A summary of the Delegated-IPv6-Prefix-Pool attribute format is shown
-   below.
-       0                   1                   2
-       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |     Type      |    Length     |     String...
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-   Type
-
-      TBA4 for Delegated-IPv6-Prefix-Pool
-
-   Length
-
-      Length in bytes.  At least 3.
-
-   String
-
-      The string field contains the name of an assigned IPv6 prefix pool
-      configured on the NAS.  The field is not NULL (hexadecimal 00)
-      terminated.
-
-   Note: The string data type is as documented in [RFC6158], and carries
-   binary data that is external to the Radius protocol, eg the name of a
-   pool of prefixes configured on the NAS.
-
-
-
-Dec, et al.              Expires August 16, 2013                [Page 9]
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+   Type 
 
+      TBA1 pour Framed-IPv6-Address 
 
-3.5.  Stateful-IPv6-Address-Pool
+   Longueur 
 
-   This attribute contains the name of an assigned pool that SHOULD be
-   used to select an IPv6 address for the user on the NAS.  If a NAS
-   does not support address pools, the NAS MUST ignore this attribute.
-   A summary of the Stateful-IPv6-Address-Pool attribute format is shown
-   below.  It MAY be used in an Access-Request packet as a hint by the
-   NAS to the RADIUS server regarding the pool, but the RADIUS server is
-   not required to honor the hint.
+      18 
 
-       0                   1                   2
-       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |     Type      |    Length     |     String...
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   Adresse 
 
+      Le champ d'adresse IPv6 contient une adresse IPv6 de 128 bits.
 
-   Type
+3.2 . DNS-Server-IPv6-Address
 
-      TBA5 for Stateful-IPv6-Address-Pool
+   L'attribut DNS-Server-IPv6-Address contient l'adresse IPv6 d'un 
+   serveur DNS. Cet attribut PEUT être inclus plusieurs fois dans les 
+   paquets Access- Accept, lorsque l'intention est pour un NAS d'annoncer plus d' 
+   une adresse de serveur DNS à un RG / hôte. On 
+   s'attend à ce que le même ordre des attributs soit suivi dans les annonces au 
+   client RADIUS. L'attribut PEUT être utilisé dans un paquet de demande d'accès 
+   comme indice par le NAS au serveur RADIUS concernant l' 
+   adresse DNS IPv6 , mais le serveur RADIUS n'est pas tenu d'honorer cet indice. 
 
-   Length
+   Le contenu de cet attribut peut être inséré dans une option DHCPv6 comme 
+   spécifié dans [ RFC3646 ] ou dans une annonce de routeur IPv6 selon
+   [ RFC6106 ]. 
 
-      Length in bytes.  At least 3.
+   Un résumé du format d'attribut DNS-Server-IPv6-Address est donné 
+   ci-dessous. Le format de l'adresse est conforme à [ RFC3162 ]. 
 
-   String
-
-      The string field contains the name of an assigned IPv6 stateful
-      address pool configured on the NAS.  The field is not NULL
-      (hexadecimal 00) terminated.
-
-   Note: The string data type is as documented in [RFC6158], and carries
-   binary data that is external to the Radius protocol, eg the name of a
-   pool of addresses configured on the NAS.
-
-3.6.  Table of attributes
-
-   The following table provides a guide to which attributes may be found
-   in which kinds of packets, and in what quantity.  The optional
-   inclusion of the options in Access Request messages is intended to
-   allow for a network access server (NAS) to provide the RADIUS server
-   with a hint of the attributes in advance of user authentication,
-   which may be useful in cases where a user re-connects or has a static
-   address.  The server is under no obligation to honor such hints.
+     0 1 2 3 
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+    | Type | Longueur | Adresse 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+                              Adresse (suite) 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+                              Adresse (suite)
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+                              Adresse (suite) 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+             Adresse (suite) | 
+    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + Dec, et al. Expire le 16 août 2013 [Page 7]
 
 
 
@@ -481,15 +301,170 @@ Internet-Draft             RADIUS IPv6 Access              February 2013
 
 
 
-Dec, et al.              Expires August 16, 2013               [Page 10]
+
  
-Internet-Draft             RADIUS IPv6 Access              February 2013
+Internet-Draft RADIUS IPv6 Access Février 2013
+
+ 
+   Type 
+
+      TBA2 pour DNS-Server-IPv6-Address 
+
+   Longueur 
+
+      18 
+
+   Adresse Adresse 
+
+      IPv6 128 bits d'un serveur DNS.
+
+3.3 . Route-IPv6-Information
+
+   Cet attribut spécifie un préfixe (et une route correspondante) pour l' 
+   utilisateur sur le NAS, qui doit être annoncé à l'aide de l' 
+   option d' informations sur la route définie dans "Préférences de routeur par défaut et 
+   routes plus spécifiques " [RFC4191] Section 2.3 . Il est utilisé dans le 
+   paquet Access-Accept et peut apparaître plusieurs fois. Il PEUT être utilisé dans un 
+   paquet de demande d' accès comme indice par le NAS au serveur RADIUS, mais le 
+   serveur RADIUS n'est pas tenu d'honorer cet indice. Le 
+   format d'attribut Route-IPv6- Information est illustré ci-dessous. Le format du 
+   préfixe est conforme à [ RFC3162 ]. 
 
 
-   Request Accept Reject Challenge Accounting  #  Attribute
-                                   Request
-   0+      0+     0      0         0+   TBA1  Framed-IPv6-Address
-   0+      0+     0      0         0+   TBA2  DNS-Server-IPv6-Address
-   0+      0+     0      0         0+   TBA3  Route-IPv6-Information
-   0+      0+     0      0         0+   TBA4  Delegated-IPv6-Prefix-Pool
-   0+      0+     0      0         0+   TBA5  Stateful-IPv6-Address-Pool
+        0 1 2 3
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+       + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+       | Type | Longueur | Réservé | Longueur du préfixe | 
+       + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+       | | 
+       . Préfixe (variable). 
+       . . 
+       | | 
+       + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+
+   Type 
+
+      TBA3 pour Route-IPv6-Information
+
+   Longueur 
+
+      Longueur en octets. Au moins 4 et pas plus de 20; généralement 12 
+      ou moins. Dec et al. Expire le 16 août 2013 [Page 8]
+
+
+ 
+Internet-Draft RADIUS IPv6 Access Février 2013
+
+ 
+   Longueur du préfixe 
+
+      Entier non signé 8 bits. Nombre de bits de tête du préfixe 
+      valides. La valeur varie de 0 à 128. Le champ de préfixe 
+      est de 0, 8 ou 16 octets selon la longueur. 
+
+   Préfixe 
+
+      Champ de longueur variable contenant un préfixe IP. Le 
+      champ de longueur de préfixe contient le nombre de bits de tête valides dans le préfixe. 
+      Les bits du préfixe après la longueur du préfixe (le cas échéant) sont 
+      réservés et DOIVENT être initialisés à zéro.
+
+3.4 . Pool de préfixes IPv6 délégués
+
+   Cet attribut contient le nom d'un pool attribué qui DEVRAIT être 
+   utilisé pour sélectionner un préfixe délégué IPv6 pour l'utilisateur sur le NAS. Si 
+   un NAS ne prend pas en charge les pools de préfixes, le NAS DOIT ignorer cet 
+   attribut. Il PEUT être utilisé dans un paquet de demande d'accès comme indice par 
+   le NAS au serveur RADIUS concernant le pool, mais le 
+   serveur RADIUS n'est pas tenu d'honorer cet indice. 
+
+   Un résumé du format d'attribut Pool de préfixes IPv6 délégués est présenté 
+   ci - dessous. 
+       0 1 2 
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 
+      + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+      | Type | Longueur | Chaîne...
+      + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+
+
+   Type 
+
+      TBA4 pour Delegated-IPv6-Prefix-Pool 
+
+   Length 
+
+      Longueur en octets. Au moins 3. 
+
+   Chaîne 
+
+      Le champ de chaîne contient le nom d'un pool de préfixes IPv6 attribué 
+      configuré sur le NAS. Le champ n'est pas 
+      terminé NULL (hexadécimal 00) . 
+
+   Remarque: Le type de données de chaîne est tel que documenté dans [ RFC6158 ], et transporte des 
+   données binaires qui sont externes au protocole Radius, par exemple le nom d'un 
+   pool de préfixes configuré sur le NAS. Dec et al. Expire le 16 août 2013 [Page 9]
+
+
+
+ 
+Internet-Draft RADIUS IPv6 Access Février 2013
+
+
+3.5 . Pool d'adresses IPv6 avec état
+
+   Cet attribut contient le nom d'un pool attribué qui DEVRAIT être 
+   utilisé pour sélectionner une adresse IPv6 pour l'utilisateur sur le NAS. Si un NAS 
+   ne prend pas en charge les pools d'adresses, le NAS DOIT ignorer cet attribut. 
+   Un résumé du format d'attribut Stateful-IPv6-Address-Pool est présenté 
+   ci - dessous. Il PEUT être utilisé dans un paquet de demande d'accès comme indice par le 
+   NAS au serveur RADIUS concernant le pool, mais le serveur RADIUS n'est 
+   pas tenu d'honorer cet indice. 
+
+       0 1 2 
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 
+      + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+      | Type | Longueur | Chaîne...
+      + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + 
+
+
+   Type 
+
+      TBA5 pour Stateful-IPv6-Address-Pool 
+
+   Length 
+
+      Longueur en octets. Au moins 3. 
+
+   Chaîne 
+
+      Le champ de chaîne contient le nom d'un 
+      pool d'adresses avec état IPv6 attribué configuré sur le NAS. Le champ n'est pas 
+      terminé NULL (hexadécimal 00). 
+
+   Remarque: Le type de données de chaîne est tel que documenté dans [ RFC6158 ] et transporte des 
+   données binaires qui sont externes au protocole Radius, par exemple le nom d'un 
+   pool d'adresses configuré sur le NAS.
+
+3.6 . Tableau d'attributs
+
+   Le tableau suivant fournit un guide sur les attributs qui peuvent être trouvés 
+   dans quels types de paquets et en quelle quantité. L' 
+   inclusion facultative des options dans les messages de demande d'accès est destinée à 
+   permettre à un serveur d'accès au réseau (NAS) de fournir au serveur RADIUS 
+   un indice des attributs avant l'authentification de l'utilisateur, 
+   ce qui peut être utile dans les cas où un utilisateur se connecte ou a une 
+   adresse statique . Le serveur n'est pas tenu d'honorer ces indications. Dec et al. Expire le 16 août 2013 [Page 10]
+
+
+ 
+Internet-Draft RADIUS IPv6 Access Février 2013
+
+ 
+   Request Accept Reject Challenge Accounting # Attribute 
+                                   Request 
+   0+ 0+ 0 0 0+ TBA1 Framed-IPv6-Address 
+   0+ 0+ 0 0 0+ TBA2 DNS-Server-IPv6-Address 
+   0+ 0+ 0 0 0+ TBA3 Route-IPv6-Information 
+   0+ 0+ 0 0 0+ TBA4 Delegated-IPv6-Prefix-Pool 
+   0+ 0+ 0 0 0+ TBA5 Stateful-IPv6-Address-Pool
